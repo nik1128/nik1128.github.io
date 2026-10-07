@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>One member, two systems: the everyday issues</title>
+<style>
+:root{
+  --bg:#E9EDF1; --surface:#FFFFFF; --surface-2:#F3F5F8; --ink:#17202B; --muted:#5B6775; --line:#D3DAE1;
+  --sf:#1B5FA6; --sf-soft:#E3EDF8; --wp:#6A3FC4; --wp-soft:#EFE9FA; --key:#9A5F07; --key-soft:#FBF1DF;
+  --ref:#7F8B98; --ok:#1F7A4D; --ok-soft:#E2F3EA; --warn:#9A5F07; --warn-soft:#FBF1DF; --alert:#B3261E; --alert-soft:#FBE7E5; --flash:#FFE7A8;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151B; --surface:#19212A; --surface-2:#1F2933; --ink:#E6EBF0; --muted:#9AA6B2; --line:#2E3A46;
+    --sf:#6AA8EE; --sf-soft:#1A2B3F; --wp:#AE92F2; --wp-soft:#2A2140; --key:#E3A43C; --key-soft:#33280F;
+    --ref:#8C98A5; --ok:#5CC08C; --ok-soft:#163326; --warn:#E3A43C; --warn-soft:#33280F; --alert:#F08B82; --alert-soft:#3A1917; --flash:#5A4712; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151B; --surface:#19212A; --surface-2:#1F2933; --ink:#E6EBF0; --muted:#9AA6B2; --line:#2E3A46;
+  --sf:#6AA8EE; --sf-soft:#1A2B3F; --wp:#AE92F2; --wp-soft:#2A2140; --key:#E3A43C; --key-soft:#33280F;
+  --ref:#8C98A5; --ok:#5CC08C; --ok-soft:#163326; --warn:#E3A43C; --warn-soft:#33280F; --alert:#F08B82; --alert-soft:#3A1917; --flash:#5A4712; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums}
+button,select,textarea,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--sf);outline-offset:2px}
+
+.top{max-width:1560px;margin:0 auto;padding:20px 20px 6px}
+.top h1{font-size:26px;line-height:1.15;margin:0 0 4px;font-weight:650;letter-spacing:-.01em}
+.top p{margin:0;color:var(--muted);max-width:74ch}
+.controls{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin-top:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:3px}
+.seg button{border:0;background:none;padding:7px 14px;border-radius:7px;cursor:pointer;color:var(--muted);font-weight:550}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.theme{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:22px;height:14px;border-radius:3px;display:inline-block}
+.sw.o{background:var(--surface);border:1.5px solid var(--ink)}
+.sw.r{background:var(--surface-2);border:1.5px dashed var(--ref)}
+.sw.k{background:var(--key-soft);border:1.5px solid var(--key)}
+
+.layout{max-width:1560px;margin:0 auto;padding:12px 20px 24px;display:grid;grid-template-columns:260px minmax(0,1fr);gap:20px;align-items:start}
+.rail{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 8px;position:sticky;top:calc(12px + env(safe-area-inset-top,0px))}
+.rail h2{font-size:12.5px;color:var(--muted);font-weight:650;margin:12px 8px 4px}
+.rail h2:first-child{margin-top:2px}
+.rail button{display:flex;width:100%;text-align:left;justify-content:space-between;gap:8px;align-items:center;border:0;background:none;padding:7px 8px;border-radius:7px;cursor:pointer}
+.rail button:hover{background:var(--surface-2)}
+.rail button[aria-current="true"]{background:var(--ink);color:var(--surface)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)} .dot.alert{background:var(--alert)}
+.railkey{font-size:12px;color:var(--muted);padding:10px 8px 2px;border-top:1px solid var(--line);margin-top:10px;display:grid;gap:3px}
+.railkey span{display:flex;gap:6px;align-items:center}
+.pick{display:none;width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:grid;grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,1fr));gap:12px 20px}
+.summary .t{font-size:19px;font-weight:650;line-height:1.25}
+.summary .g{font-size:12.5px;color:var(--muted)}
+.summary .k{font-size:12px;color:var(--muted);display:block;margin-bottom:3px}
+.badge{display:inline-block;font-size:13px;font-weight:600;padding:3px 9px;border-radius:999px}
+.badge.ok{background:var(--ok-soft);color:var(--ok)} .badge.warn{background:var(--warn-soft);color:var(--warn)} .badge.alert{background:var(--alert-soft);color:var(--alert)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:12.5px;padding:2px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line)}
+
+.stage{display:grid;gap:20px}
+.stage.split{grid-template-columns:1fr 1fr}
+.view{display:none;min-width:0}
+.view.show{display:block}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;color:#fff}
+.bar strong{font-size:15px} .bar small{opacity:.88}
+.sf .bar{background:var(--sf)} .wp .bar{background:var(--wp)}
+.ownline{padding:10px 16px;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+.ownline b{color:var(--ink);font-weight:600}
+.casehead{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline}
+.casehead .t{font-size:17px;font-weight:650;margin-right:auto}
+
+.sf .body{display:grid;grid-template-columns:minmax(210px,1fr) minmax(280px,1.5fr) minmax(210px,1fr)}
+.wp .body{display:grid;grid-template-columns:1fr 1fr}
+.split .sf .body{grid-template-columns:1fr 1fr}
+.split .sf .col.mid{grid-column:1 / -1;order:3;border-right:0;border-top:1px solid var(--line)}
+.col{padding:14px 16px;border-right:1px solid var(--line);min-width:0}
+.col:last-child{border-right:0}
+.wp .col:nth-child(2){border-right:0}
+.wp .col.wide{grid-column:1 / -1;border-top:1px solid var(--line);border-right:0}
+.col h3{font-size:13.5px;font-weight:650;margin:16px 0 8px;color:var(--muted)}
+.col h3:first-child{margin-top:2px}
+
+.f{position:relative;border-radius:8px;padding:7px 10px;margin:0 0 6px;border:1.5px solid transparent}
+.f .l{display:block;font-size:12px;color:var(--muted)}
+.f .v{display:block;font-weight:560;overflow-wrap:anywhere}
+.f.owned{background:var(--surface);border-color:var(--line)}
+.f.ref{background:var(--surface-2);border:1.5px dashed var(--ref);cursor:pointer}
+.f.ref .src{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.f.ref:hover{border-style:solid}
+.f.key{background:var(--key-soft);border-color:var(--key)}
+.f.key .v{color:var(--key)}
+.f.hl{box-shadow:0 0 0 3px var(--key)}
+.f.flash{animation:flash 1.4s ease-out}
+@keyframes flash{0%{background:var(--flash)}100%{}}
+@media (prefers-reduced-motion:reduce){.f.flash{animation:none;box-shadow:0 0 0 3px var(--key)}}
+.v.ok{color:var(--ok)} .v.warn{color:var(--warn)} .v.alert{color:var(--alert)}
+.verdict{border-left-width:5px!important;border-left-style:solid!important}
+.verdict.ok{border-left-color:var(--ok)!important} .verdict.warn{border-left-color:var(--warn)!important} .verdict.alert{border-left-color:var(--alert)!important}
+
+.chat{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.msg{max-width:88%;padding:8px 11px;border-radius:10px;font-size:14px}
+.msg .who{display:block;font-size:11.5px;color:var(--muted);margin-bottom:2px}
+.msg.m{background:var(--surface-2);align-self:flex-start}
+.msg.a{background:var(--sf-soft);align-self:flex-end}
+.msg.sys{align-self:center;background:none;color:var(--muted);font-size:12.5px;padding:2px}
+.lab{font-size:12px;color:var(--muted);display:block;margin-bottom:3px}
+textarea{width:100%;min-height:118px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);resize:vertical}
+select.inline{width:100%;margin-top:3px;padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface);padding:6px 12px;border-radius:7px;cursor:pointer;font-weight:550}
+.btn.primary{background:var(--sf);color:#fff;border-color:var(--sf)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.rule{font-size:13px;padding:7px 10px;border-radius:8px;background:var(--surface-2);margin:0 0 6px}
+.rule b{font-weight:600}
+.done{font-size:13px;color:var(--ok);font-weight:600}
+.none{font-size:13px;color:var(--muted);padding:6px 10px;border:1.5px dashed var(--line);border-radius:8px;margin-bottom:6px}
+.locked{border:1.5px solid var(--line);border-radius:8px;padding:12px;margin-bottom:6px;background:repeating-linear-gradient(135deg,var(--surface-2) 0 8px,var(--surface) 8px 16px)}
+.locked b{display:block;margin-bottom:2px}
+.xlink{display:flex;flex-direction:column;gap:2px;margin:2px 0 10px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface)}
+.xlink button{align-self:flex-start;border:0;background:none;padding:0;cursor:pointer;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.sf .xlink button{color:var(--wp)} .wp .xlink button{color:var(--sf)}
+.xlink code{font-family:inherit;font-size:11.5px;color:var(--muted);overflow-wrap:anywhere}
+.log{list-style:none;margin:0;padding:0;font-size:13.5px}
+.log li{padding:6px 0;border-bottom:1px solid var(--line);display:flex;gap:10px}
+.log li:last-child{border-bottom:0}
+.log time{color:var(--muted);min-width:64px;flex:none}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;white-space:nowrap}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:min(580px,calc(100% - 24px));background:var(--ink);color:var(--surface);border-radius:10px;padding:12px 14px;display:none;gap:12px;align-items:center;box-shadow:0 8px 28px rgba(0,0,0,.25);z-index:10}
+.toast.show{display:flex}
+.toast p{margin:0;font-size:14px}
+.toast button{flex:none;border:0;border-radius:7px;padding:7px 11px;background:var(--surface);color:var(--ink);cursor:pointer;font-weight:600}
+.toast .x{background:none;color:var(--surface);padding:4px 6px}
+.foot{max-width:1560px;margin:0 auto;padding:0 20px 28px;color:var(--muted);font-size:12.5px}
+
+@media (max-width:1279px){ .stage.split{grid-template-columns:1fr} #btn-split{display:none} }
+@media (max-width:1100px){ .summary{grid-template-columns:1fr 1fr} .summary .head{grid-column:1 / -1} }
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .rail{display:none} .pick{display:block}
+  .sf .body,.wp .body,.split .sf .body{grid-template-columns:1fr}
+  .col{border-right:0!important;border-bottom:1px solid var(--line)}
+  .col:last-child{border-bottom:0}
+  .sf .col.mid{order:0}
+  .top h1{font-size:22px}
+}
+@media (max-width:520px){ .summary{grid-template-columns:1fr} }
+.rolebox{display:inline-flex;align-items:center;gap:8px;font-size:13.5px}
+.rolebox select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.call{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:9px 16px;border-bottom:1px solid var(--line);background:var(--sf-soft);font-size:13.5px}
+.call b{font-weight:650}
+.call .live{display:inline-flex;align-items:center;gap:6px;font-weight:650;color:var(--alert)}
+.call .live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--alert)}
+.call small{color:var(--muted)}
+.verify{border-radius:8px;padding:9px 10px;margin:0 0 8px;border:1.5px solid var(--line)}
+.verify.ok{background:var(--ok-soft);border-color:transparent}
+.verify.no{background:var(--warn-soft);border-color:transparent}
+.verify .l{display:block;font-size:12px;color:var(--muted)}
+.verify .v{display:block;font-weight:600}
+.verify .demo{font-size:12px;color:var(--muted);margin-top:4px}
+.masked .v{color:var(--muted)!important;font-weight:500;font-style:italic}
+.need{font-size:12px;color:var(--muted)}
+.actbox{border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;margin:0 0 8px}
+.actbox .row{margin-top:4px}
+.perm{max-width:1560px;margin:0 auto;padding:0 20px 20px}
+.perm details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.perm summary{cursor:pointer;font-weight:650}
+.perm td.y{color:var(--ok);font-weight:600} .perm td.n{color:var(--muted)}
+.perm tr.me td{background:var(--sf-soft)}
+.readings{border:1.5px solid var(--ok);border-radius:8px;padding:10px;margin-bottom:6px;background:var(--ok-soft)}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>One member, two systems: the everyday issues</h1>
+  <p>Pick a common Membership Services issue to see it in Salesforce Service Cloud and in WHOOP's own member platform. Each fact is edited in one place only. Switch roles to see who can do what, and channels to see when identity checks are needed.</p>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Choose view">
+      <button id="btn-sf" aria-pressed="true" data-mode="sf">Salesforce Service Cloud</button>
+      <button id="btn-wp" aria-pressed="false" data-mode="wp">WHOOP member platform</button>
+      <button id="btn-split" aria-pressed="false" data-mode="split">Side by side</button>
+    </div>
+    <label class="rolebox">Signed in as
+      <select id="role" aria-label="Signed in as"></select>
+    </label>
+    <button class="theme" id="theme">Dark theme</button>
+    <button class="theme" id="reset">Reset demo</button>
+  </div>
+  <div class="legend" aria-label="Legend" style="margin-top:10px">
+    <span><i class="sw o"></i>Owned and edited here</span>
+    <span><i class="sw r"></i>Shown from another system, read-only</span>
+    <span><i class="sw k"></i>Shared key</span>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="rail" id="rail" aria-label="Issue types"></nav>
+  <div>
+    <select class="pick" id="pick" aria-label="Choose an issue"></select>
+    <section class="summary" id="summary" aria-live="polite"></section>
+    <main class="stage" id="stage">
+      <section class="view sf show" id="view-sf" aria-label="Salesforce Service Cloud view"></section>
+      <section class="view wp" id="view-wp" aria-label="WHOOP member platform view"></section>
+    </main>
+  </div>
+</div>
+
+<section class="perm" aria-label="Who can do what">
+  <details><summary>Who can do what (roles and permissions)</summary><div class="tablewrap" id="permtable" style="margin-top:10px"></div></details>
+</section>
+
+<p class="foot">Phone calls come in through the CTI integration with Salesforce. In-app messages are already signed in, so they need no extra identity check. Membership Services handles billing end to end; the billing platform processes charges and refunds. Illustrative only: members, cases, orders and numbers are fictional, policies are simplified from WHOOP's public pages, and screens are not Salesforce's or WHOOP's actual interfaces.</p>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <p id="toast-text"></p>
+  <button id="toast-go">Open</button>
+  <button class="x" id="toast-x" aria-label="Close">✕</button>
+</div>
+<script>
+var WP="WHOOP platform", POL="WHOOP policy engine", NS="NetSuite", BILL="Billing platform";
+var ISSUES=[
+{id:"sync",g:"Device and app",t:"Strap stopped syncing",who:["WHOOP assistant can resolve","ok"],
+ m:{n:"Leah K.",id:"WHP-006231",email:"leah.k@example.com",phone:"+1 (857) 555-0119",tier:"Peak",renew:"Feb 3, 2027",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, app sign-in, 10:05 am"},
+ ch:"In-app chat",no:"00131007",
+ chat:[["m","My strap hasn't synced since I updated my phone on Sunday."],["a","That update can switch off Bluetooth access for the WHOOP app. Open Settings, then WHOOP, and turn Bluetooth back on. Your strap will sync on its own."],["m","Done, it's syncing now. Thanks!"]],
+ reply:"Glad it's syncing again, Leah. If it stops within the next day, reply here and we'll take a closer look.",
+ v:["Known issue for this phone version: Bluetooth access reset by the update. Guided fix, escalate if no sync within 24 hours.","ok",WP],
+ sfRef:[["os","Phone and app","iOS 27.0, app 5.12.0 (update available)",WP],["sync","Last sync","3 days ago, now syncing",WP]],
+ art:"Fix syncing after a phone update",codes:["Resolved by troubleshooting","Escalated to device team","Replacement needed"],
+ wpOwn:[["os","Phone and app","iOS 27.0, app 5.12.0 (update available)"],["sync","Last sync","3 days ago, now syncing"],["bt","Bluetooth access","Turned off Sep 27, back on 10:07 am"]],
+ sys:["Salesforce","WHOOP platform"],done:"Strap syncs and stays synced for 24 hours",
+ ev:[["10:07 am","Strap synced. Status sent to case (real time)"],["10:05 am","Device check sent to case (real time)"]],
+ rec:["Sync cases closed as fixed, but strap still not syncing 48 hours later","3","Membership Services ops"]},
+
+{id:"sleep",g:"Device and app",t:"Score looks wrong",who:["WHOOP assistant can resolve","ok"],
+ m:{n:"Chris P.",id:"WHP-007754",email:"chris.p@example.com",phone:"+1 (781) 555-0163",tier:"One",renew:"Jun 11, 2027",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, app sign-in, 7:12 am"},
+ ch:"In-app chat",no:"00131022",
+ chat:[["m","My recovery was 34% but I slept great. Is my strap broken?"],["a","Your strap is working normally. Recovery also looks at your heart rate variability against your recent baseline, and yours was lower last night. I can walk you through what affected it in the app."]],
+ reply:"Hi Chris, your strap checks out fine. The WHOOP assistant can show you exactly what pulled your score down. Let me know if anything still looks off.",
+ v:["Device healthy. Score explained in the app from the member's own data. No data values sent to Salesforce.","ok",WP],
+ sfRef:[["hw","Device check","Sensors and fit normal",WP]],
+ art:"How your Recovery score is calculated",codes:["Score explained","Device issue found"],
+ wpOwn:[["hw","Device check","Sensors and fit normal"],["data","Score details","Available to the WHOOP assistant in the app only"]],
+ lock:"Sleep and recovery data stays in the WHOOP platform. The assistant explains it in the app; Salesforce only gets \"device check passed.\"",
+ sys:["Salesforce","WHOOP platform"],done:"Member understands the score, device confirmed healthy",
+ ev:[["7:13 am","Device check result sent to case (real time)"]],
+ rec:["Score cases that later turned into a device replacement","1","Business Systems"]},
+
+{id:"defect",g:"Hardware and orders",t:"Strap won't charge (warranty)",who:["Rep","ok"],
+ m:{n:"Omar B.",id:"WHP-003390",email:"omar.b@example.com",phone:"+1 (617) 555-0177",tier:"One",renew:"Nov 20, 2026",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, SMS code, 11:31 am"},
+ ch:"Phone",no:"00131040",
+ chat:[["m","My strap won't charge past 20% anymore, even with a new cable."],["sys","Call with Taylor R., 11:30 am"]],
+ reply:"Hi Omar, thanks for your patience on the call. Your strap is covered, so a replacement is on its way. You'll get tracking by email.",
+ v:["Covered by warranty. Bought from WHOOP, membership active, payment method valid.","ok",POL],
+ sfRef:[["order","Replacement order","SO-58841, ready to ship",NS]],keys:[["order","Order number","SO-58841"]],
+ rule:"Can't close as \"Warranty replacement\" until a replacement order number is on the case.",
+ art:"Warranty replacements",codes:["Warranty replacement","Troubleshooting fixed it"],
+ wpOwn:[["bat","Battery check","Holds 18% after a full charge"],["chan","Purchase channel","WHOOP.com"]],
+ sys:["Salesforce","WHOOP platform","NetSuite"],done:"Replacement order created and shipped",
+ ev:[["11:36 am","Order SO-58841 created in NetSuite, number sent to case (real time)"],["11:33 am","Warranty verdict sent to case (real time)"]],
+ rec:["Cases closed as warranty replacement with no matching order","2","Membership Services ops"]},
+
+{id:"lost",g:"Hardware and orders",t:"Lost or stolen strap",who:["Rep","warn"],
+ m:{n:"Marcus T.",id:"WHP-002118",email:"marcus.t@example.com",phone:"+1 (339) 555-0104",tier:"Peak",renew:"Apr 2, 2027",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, app sign-in, 9:58 am"},
+ ch:"Email",no:"00131051",
+ chat:[["m","I left my strap on a flight. Can you send me a new one?"]],
+ reply:"Hi Marcus, sorry to hear that. Lost straps aren't covered by the warranty, but I've locked the old one to your account so no one else can use it. You can order a replacement in the app, and your membership carries straight over.",
+ v:["Not covered. Lost or stolen straps aren't covered by warranty. Member can buy a replacement.","warn",POL],
+ sfRef:[["lostf","Lost or stolen","Reported 10:02 am, strap locked",WP]],
+ rule:"Reporting lost sends an event to the WHOOP platform. The platform owns the flag and locks the strap.",
+ art:"If your strap is lost or stolen",codes:["Lost, replacement bought","Lost, no replacement yet"],
+ wpOwn:[["lostf","Lost or stolen","Reported 10:02 am, strap locked"]],
+ sys:["Salesforce","WHOOP platform"],done:"Old strap locked, member knows how to replace it",
+ ev:[["10:02 am","Lost report received from case, strap locked (real time)"]],
+ rec:["Straps flagged lost with no case explaining why","0","Business Systems"]},
+
+{id:"market",g:"Hardware and orders",t:"Bought from another seller",who:["Senior rep","warn"],
+ m:{n:"Alex M.",id:"WHP-008402",email:"alex.m@example.com",phone:"+1 (508) 555-0131",tier:"Peak",renew:"Aug 9, 2027",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, app sign-in, 1:14 pm"},
+ ch:"In-app chat",no:"00131066",
+ chat:[["m","The strap I bought on a marketplace site stopped reading my heart rate after a week."],["sys","Handed to Morgan P. at 1:16 pm"]],
+ reply:"Hi Alex, I'm sorry about the trouble. Our warranty covers straps bought from WHOOP or an approved partner. Could you send your receipt so we can check where it came from?",
+ v:["Needs proof of purchase. Warranty covers WHOOP and approved partners only. This seller isn't on the approved list.","warn",POL],
+ sfOwn:[["Receipt","Not received yet"]],
+ rule:"Can't close until the purchase channel is confirmed in the WHOOP platform.",
+ art:"Where to buy WHOOP safely",codes:["Covered after proof","Not covered, unapproved seller","Referred to seller"],
+ wpOwn:[["chan","Purchase channel","Third-party seller, not verified"],["list","Approved partner list","Version 9, seller not listed"]],
+ sfRef:[["chan","Purchase channel","Third-party seller, not verified",WP]],
+ sys:["Salesforce","WHOOP platform"],done:"Channel confirmed and warranty decision recorded",
+ ev:[["1:15 pm","Warranty verdict sent to case (real time)"]],
+ rec:["Warranty approvals where the channel wasn't WHOOP or an approved partner","0","Membership Services ops"]},
+
+{id:"ship",g:"Hardware and orders",t:"Where's my order?",who:["WHOOP assistant can resolve","ok"],
+ m:{n:"Ben A.",id:"WHP-009917",email:"ben.a@example.com",phone:"+1 (774) 555-0188",tier:"Peak",renew:"Sep 22, 2027",dev:"Not yet paired",ver:"Passed, app sign-in, 8:40 am"},
+ ch:"In-app chat",no:"00131080",
+ chat:[["m","It's been 8 days and my WHOOP still hasn't arrived."],["a","Your order shipped on Sep 23 and is held up at a regional hub. The carrier now expects Oct 2. I'll message you if that changes."]],
+ reply:"Hi Ben, just checking in: your strap is still on track for Oct 2. If it hasn't arrived by Oct 3, reply here and we'll send a new one.",
+ v:["Shipped Sep 23. Carrier shows a delay at a regional hub. Expected Oct 2.","ok",NS],
+ sfRef:[["order","Shipping","Delayed at hub, expected Oct 2",NS]],keys:[["order","Order number","SO-59102"]],
+ art:"Tracking your order",codes:["Tracking shared","Reshipped","Escalated to logistics"],
+ wpOwn:[["mem","Membership status","Active, strap not yet paired"]],
+ sys:["Salesforce","WHOOP platform","NetSuite"],done:"Strap delivered, or reshipped after Oct 3",
+ ev:[["8:41 am","Shipping status shown from NetSuite by order number (live lookup)"]],
+ rec:["Orders delayed over 10 days with no support case","4","Logistics"]},
+
+{id:"upgrade",g:"Membership and billing",t:"Upgrade to Life",who:["Rep","ok"],
+ m:{n:"Priya S.",id:"WHP-004817",email:"priya.s@example.com",phone:"+1 (617) 555-0142",tier:"Peak",renew:"Mar 29, 2027",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, app sign-in, 9:48 am"},
+ ch:"In-app chat",no:"00128734",
+ chat:[["m","I'd like to move from Peak to Life for the ECG. What happens to the time I've already paid for?"],["a","You're eligible. Your 6 remaining months of Peak become 4 months of Life credit, then Life renews at the standard price."],["m","Can a person confirm that before I switch?"],["sys","Handed to Taylor R. at 9:51 am"]],
+ reply:"Hi Priya, Taylor here. I can confirm it: your 6 months left on Peak become 4 months of Life credit, and your new strap ships once you accept. Shall I go ahead?",
+ v:["Eligible. 6 months of Peak becomes 4 months of Life credit (3:2).","ok",POL],
+ art:"Upgrading your membership",codes:["Upgrade completed","Upgrade declined"],
+ wpOwn:[["rule","Upgrade rule, version 14","Remaining months move to Life at a 3:2 ratio"],["used","Same answer used by","Rep screen, help centre, WHOOP assistant"]],
+ sys:["Salesforce","WHOOP platform","NetSuite"],done:"Tier changed and the MG strap order created",
+ ev:[["9:51 am","Policy verdict sent to case (real time)"]],
+ rec:["Upgrade cases closed as completed where the tier didn't change","0","Business Systems"]},
+
+{id:"down",g:"Membership and billing",t:"Downgrade or cancel",who:["Retention specialist","warn"],
+ m:{n:"Dana R.",id:"WHP-001265",email:"dana.r@example.com",phone:"+1 (978) 555-0150",tier:"Life",renew:"Jan 14, 2027",dev:"WHOOP MG, firmware 41.17.2",ver:"Passed, app sign-in, 2:02 pm"},
+ ch:"Email",no:"00131095",
+ chat:[["m","I want to drop to One. Can I get a refund for the rest of this year?"],["sys","Routed to retention, possible cancellation"]],
+ reply:"Hi Dana, thanks for letting us know. We don't refund unused time, but your switch to One will start when this billing period ends on Jan 14, and you'll keep Life features until then. Before you switch, would it help if I walked you through what changes?",
+ v:["Outside the 30-day refund window, so no refund for unused time. Move to One starts at the end of the billing period, Jan 14, 2027.","warn",POL],
+ sfOwn:[["Reason for leaving","Price"],["Offer made","Walkthrough of plan differences"]],
+ art:"Changing or cancelling your membership",codes:["Downgrade scheduled","Kept current tier","Cancelled"],
+ wpOwn:[["pend","Scheduled change","Move to One on Jan 14, 2027"]],
+ sfRef:[["pend","Scheduled change","Move to One on Jan 14, 2027",WP]],
+ sys:["Salesforce","WHOOP platform","Billing platform"],done:"Change scheduled or member stays, reason recorded",
+ ev:[["2:09 pm","Downgrade scheduled in WHOOP platform, date sent to case (real time)"]],
+ rec:["Scheduled downgrades with no reason recorded in Salesforce","5","Membership Services ops"]},
+
+{id:"charge",g:"Membership and billing",t:"Charged after cancelling",who:["Rep","warn"],
+ m:{n:"Nia W.",id:"WHP-005530",email:"nia.w@example.com",phone:"+1 (617) 555-0126",tier:"One",renew:"Sep 30, 2027",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, SMS code, 3:20 pm"},
+ ch:"Phone",no:"00131102",
+ chat:[["m","I was charged $199 today but I thought I cancelled last month."],["sys","Call with Taylor R., 3:19 pm"]],
+ reply:"Hi Nia, following up on our call. I checked your account and support history and couldn't find a cancellation, so the renewal went through today. I've cancelled it now so you won't be charged again, and I've sent your refund request to my team lead for review. I'll update you by tomorrow.",
+ v:["No cancellation on file. Renewal is outside the refund policy, so a refund needs team lead approval. The rep handles it end to end; the billing platform only processes the refund.","warn",POL],
+ sfRef:[["chg","Last charge","$199.00 renewal, Sep 30, 2026",BILL],["refund","Refund reference","None yet, waiting on approval",BILL]],
+ sfOwn:[["Earlier cases about cancelling","None found"],["Exception approval","Sent to Jamie W. (team lead), 3:25 pm"]],
+ rule:"Can't close as \"Refund issued\" until the refund reference from the billing platform is on the case.",
+ art:"Understanding your renewal",codes:["Refund issued after approval","Charge explained, no refund","Cancelled for next renewal"],
+ wpOwn:[["canc","Cancellation requests","None before today. Cancelled 3:24 pm"]],
+ sys:["Salesforce","WHOOP platform","Billing platform"],done:"Renewal cancelled and refund decided, with a reference if issued",
+ ev:[["3:24 pm","Cancellation recorded in WHOOP platform, sent to case (real time)"]],
+ rec:["Refund cases with no refund reference","1","Finance ops"]},
+
+{id:"renew",g:"Membership and billing",t:"Auto-renewed, wants refund",who:["Rep","warn"],
+ m:{n:"Luis F.",id:"WHP-002964",email:"luis.f@example.com",phone:"+1 (617) 555-0171",tier:"Peak",renew:"Sep 18, 2027",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, app sign-in, 9:05 am"},
+ ch:"Email",no:"00131150",
+ chat:[["m","My membership renewed for a whole year without any reminder. I haven't worn it in months and want my money back."],["a","I understand. I've passed this to a member of the team who can look at your options."],["sys","Handed to a rep: refund request needs a person"]],
+ reply:"Hi Luis, I'm sorry this came as a surprise. I've checked your account: the renewal reminder went out on Aug 19. Renewals aren't normally refundable, but I've cancelled your next renewal and asked my team lead to review a refund given you haven't worn your strap since June.",
+ v:["Renewal outside the 30-day refund window. Rep can cancel the next renewal. A refund is an exception that needs team lead approval.","warn",POL],
+ sfRef:[["chg","Last charge","$239.00 renewal, Sep 18, 2026",BILL],["remind","Renewal reminder","Emailed Aug 19, 2026",WP],["worn","Last worn","June 2, 2026",WP]],
+ sfOwn:[["Exception approval","Waiting on team lead"]],
+ rule:"Refund exceptions need a team lead approval recorded on the case before the refund is processed.",
+ art:"How renewals and reminders work",codes:["Exception refund approved","Refund declined, next renewal cancelled"],
+ wpOwn:[["remind","Renewal reminder","Emailed Aug 19, 2026"],["worn","Last worn","June 2, 2026"]],
+ sys:["Salesforce","WHOOP platform","Billing platform"],done:"Next renewal cancelled and exception decided",
+ ev:[["9:07 am","Renewal and reminder history sent to case (real time)"]],
+ rec:["Renewals charged with no reminder sent 30 days before","0","Business Systems"]},
+
+{id:"dupe",g:"Membership and billing",t:"Charged twice, two accounts",who:["Senior rep","warn"],
+ m:{n:"Kai N.",id:"WHP-010233",email:"kai.n@example.com",phone:"+1 (617) 555-0158",tier:"Peak",renew:"Aug 4, 2027",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, app sign-in, 11:48 am"},
+ ch:"In-app chat",no:"00131163",
+ chat:[["m","I'm being billed twice. I only have one strap."],["a","I found two WHOOP accounts that may be yours, under different emails. A team member will join to sort this out safely."],["sys","Handed to Morgan P. at 11:50 am"]],
+ reply:"Hi Kai, Morgan here. You have a second account under your work email that was also billing you monthly. I've merged it into the account your strap uses and stopped the extra billing. The duplicate charges will be refunded within 5 to 7 business days.",
+ v:["Two accounts, different emails, both billing. Merge into the account the strap is paired to, stop billing on the other, refund duplicate charges.","warn",WP],
+ sfRef:[["acct2","Second account","WHP-010871, kai.n@work.example, monthly, billing",WP]],
+ rule:"Salesforce can't merge member accounts. The WHOOP platform merges them first, then the two Salesforce contacts are merged to match.",
+ art:"Why you might have two accounts",codes:["Accounts merged, duplicate refunded","Not a duplicate"],
+ wpOwn:[["acct2","Second account","WHP-010871, kai.n@work.example, monthly, billing"],["merge","Merge","Merge WHP-010871 into WHP-010233 (strap paired here)"]],
+ sys:["Salesforce","WHOOP platform","Billing platform"],done:"One account, one subscription, duplicates refunded, contacts merged",
+ ev:[["11:56 am","Accounts merged. Salesforce asked to merge the matching contacts (real time)"],["11:49 am","Possible duplicate account flagged on case (real time)"]],
+ rec:["Members with two active subscriptions","3","Business Systems"]},
+
+{id:"inactive",g:"Membership and billing",t:"Paid, but membership not active",who:["Rep","ok"],
+ m:{n:"Elena V.",id:"WHP-011402",email:"elena.v@example.com",phone:"+1 (617) 555-0185",tier:"Inactive",renew:"None",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, app sign-in, 1:40 pm"},
+ ch:"In-app chat",no:"00131178",
+ chat:[["m","I paid for Peak on the website, but the app says I need to renew. I don't want to pay twice."],["a","You're right not to pay again. I can see your order. A team member will link it to your account now."],["sys","Handed to Taylor R. at 1:42 pm"]],
+ reply:"Hi Elena, your Peak purchase is now linked to your account and your membership is active through Sep 28, 2027. Please don't renew in the app, as that would start a second subscription.",
+ v:["Payment received Sep 28 under order SO-59377, but not linked to this account. Link the purchase to the member ID. Don't ask the member to pay again.","ok",WP],
+ sfRef:[["order","Purchase","Peak, 12 months, paid Sep 28",NS]],keys:[["order","Order number","SO-59377"]],
+ rule:"Never tell the member to buy or renew in the app. That creates a second subscription.",
+ art:"Activating your membership after buying",codes:["Purchase linked, membership active","Escalated to Business Systems"],
+ wpOwn:[["link","Unlinked purchase","SO-59377, paid Sep 28, linked 1:45 pm"]],
+ sys:["Salesforce","WHOOP platform","NetSuite"],done:"Membership active with the right dates, no second charge",
+ ev:[["1:45 pm","Purchase linked, membership active. Status sent to case (real time)"]],
+ rec:["Paid orders with no active membership after 24 hours","6","Business Systems"]},
+
+{id:"family",g:"Membership and billing",t:"Family plan billing",who:["Rep","warn"],
+ m:{n:"Grace H.",id:"WHP-001987",email:"grace.h@example.com",phone:"+1 (617) 555-0122",tier:"Family plan, 3 memberships",renew:"Mar 3, 2027",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, app sign-in, 4:30 pm"},
+ ch:"Email",no:"00131190",
+ chat:[["m","I'm paying for 3 memberships on our family plan but we only have two straps. Can I get money back?"]],
+ reply:"Hi Grace, family plans are billed for each membership on the plan, not each strap in use, so we can't refund part of this year. I've removed the unused membership, so your next renewal on Mar 3 will be for two.",
+ v:["Billed per membership on the plan, not per device. No mid-cycle refund outside the first 30 days. Remove the unused membership so the next renewal is correct.","warn",POL],
+ sfOwn:[["Plan owner","Grace H. (this contact)"]],
+ art:"How family plans are billed",codes:["Member removed from plan","Plan explained, no change"],
+ wpOwn:[["plan","Plan memberships","3: Grace H., Tom H., one unused"],["next","Next renewal","Mar 3, 2027, for 2 memberships"]],
+ sfRef:[["plan","Plan memberships","3: Grace H., Tom H., one unused",WP]],
+ sys:["Salesforce","WHOOP platform","Billing platform"],done:"Unused membership removed and next renewal corrected",
+ ev:[["4:36 pm","Plan updated to 2 memberships, sent to case (real time)"]],
+ rec:["Family plans with more memberships than paired straps","11","Membership Services ops"]},
+
+{id:"heart",g:"Health features",t:"Worried about a heart reading",who:["Health specialist","alert"],
+ m:{n:"Jordan L.",id:"WHP-004401",email:"jordan.l@example.com",phone:"+1 (617) 555-0193",tier:"Life",renew:"May 6, 2027",dev:"WHOOP MG, firmware 41.17.2",ver:"Passed, app sign-in, 10:12 am"},
+ ch:"In-app chat",no:"00131118",
+ chat:[["m","My blood pressure insight has been high all week. Should I be worried?"],["sys","Health-sensitive. WHOOP assistant paused, routed to Casey D."]],
+ reply:"Hi Jordan, I'm Casey from the health team. To look at your readings, I'll need your OK. You'll see a request in the app. If you have chest pain, severe headache or shortness of breath, please call emergency services now.",
+ v:["Health-sensitive. Health specialist only. The assistant doesn't reply. Urgent symptoms go to emergency care.","alert",POL],
+ sfRef:[["cons","Health data consent","Requested 10:14 am, waiting for member",WP]],
+ art:"Blood Pressure Insights: what they mean",codes:["Specialist reviewed","Referred to clinician","Guided to emergency care"],
+ wpOwn:[["cons","Health data consent","Requested 10:14 am, waiting for member"],["scope","Consent scope","Blood Pressure Insights only, 24 hours"]],
+ lock:"Blood pressure readings stay in the WHOOP platform. Casey can view them here once Jordan agrees. Salesforce only shows the consent status.",
+ sys:["Salesforce","WHOOP platform"],done:"Specialist has replied and any referral is recorded",
+ ev:[["10:14 am","Consent request sent to member's app"],["10:13 am","Routed as health-sensitive, assistant blocked (real time)"]],
+ rec:["Health-sensitive cases answered by anyone other than a specialist","0","Business Systems"]},
+
+{id:"login",g:"Account and privacy",t:"Can't log in, new email",who:["Senior rep","warn"],
+ m:{n:"Rosa G.",id:"WHP-006678",email:"rosa.g@example.com",phone:"+1 (401) 555-0112",tier:"Peak",renew:"Dec 1, 2026",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Waiting for SMS code, attempt 1 of 3"},
+ ch:"Email",no:"00131127",
+ chat:[["m","I lost access to my old email and can't log in. My new one is rosa.garcia@example.net."]],
+ reply:"Hi Rosa, I can help. For your security, we've texted a code to the phone number on your account. Once it's confirmed, your email will update and you can log in again.",
+ v:["Verify identity before any account change. App sign-in isn't possible, so send an SMS code to the phone on file.","warn",WP],
+ rule:"Reps can't edit the email in Salesforce. The WHOOP platform changes it after verification and sends the new value back.",
+ art:"Getting back into your account",codes:["Email updated after verification","Couldn't verify identity"],
+ wpOwn:[["chg","Email change","Pending, waiting for verification"]],
+ sfRef:[["chg","Email change","Pending, waiting for verification",WP]],
+ sys:["Salesforce","WHOOP platform"],done:"Identity verified and email updated in the WHOOP platform",
+ ev:[["4:02 pm","SMS code sent to phone on file"]],
+ rec:["Salesforce emails that don't match the WHOOP platform","2","Business Systems"]},
+
+{id:"delete",g:"Account and privacy",t:"Delete my data",who:["Senior rep","warn"],
+ m:{n:"Theo M.",id:"WHP-003812",email:"theo.m@example.com",phone:"+1 (603) 555-0145",tier:"One",renew:"Cancelled, ends Oct 31, 2026",dev:"WHOOP 5.0, firmware 41.17.2",ver:"Passed, app sign-in, 12:20 pm"},
+ ch:"Email",no:"00131139",
+ chat:[["m","Please delete my account and all my data."]],
+ reply:"Hi Theo, we've received your request. Your account and data will be deleted, and we'll email you when it's complete. Your case history with us will be anonymised at the same time.",
+ v:["Privacy request. Identity verified. Both systems must act before the deadline.","warn",WP],
+ sfOwn:[["Contact and cases","Anonymise once the WHOOP platform confirms deletion"]],
+ sfRef:[["del","Deletion","Scheduled, due Oct 30 (illustrative)",WP]],
+ art:"Your privacy and your data",codes:["Deletion completed","Couldn't verify identity"],
+ wpOwn:[["del","Deletion","Scheduled, due Oct 30 (illustrative)"]],
+ lock:"All health and sensor data is scheduled for deletion here. Nothing to delete in Salesforce, because it was never copied there.",
+ sys:["Salesforce","WHOOP platform","Billing platform"],done:"Deleted in the platform, anonymised in Salesforce, confirmed to member",
+ ev:[["12:22 pm","Deletion request received from case (real time)"]],
+ rec:["Deleted members who still have a Salesforce contact","0","Business Systems"]}
+];
+
+
+// ---------- channels and actions ----------
+var CH={"sync":"In-app chat","sleep":"In-app chat","defect":"Phone","lost":"Email","market":"In-app chat","ship":"Website message",
+ "upgrade":"In-app chat","down":"Email","charge":"Phone","renew":"Website message","dupe":"In-app chat","inactive":"In-app chat",
+ "family":"Email","heart":"In-app chat","login":"Website message","delete":"Email"};
+var R=["rep","senior","lead"], S=["senior","lead"], L=["lead"];
+var ACT={
+ defect:{l:"Create replacement order",r:R,d:"Order SO-58841 created in NetSuite. Number added to the case."},
+ lost:{l:"Report strap lost",r:R,d:"Lost report sent. The WHOOP platform locked the strap."},
+ market:{l:"Request proof of purchase",r:S,d:"Receipt request sent to the member."},
+ ship:{l:"Reship order",r:S,d:"Reship requested in NetSuite, to go out if not delivered by Oct 3."},
+ upgrade:{l:"Apply upgrade",r:R,d:"Upgrade applied in the WHOOP platform. MG strap order created."},
+ down:{l:"Schedule downgrade",r:S,d:"Move to One scheduled for Jan 14, 2027."},
+ charge:{l:"Approve refund exception",r:L,d:"Exception approved. Billing platform processing refund RF-20931."},
+ renew:{l:"Approve refund exception",r:L,d:"Exception approved. Billing platform processing refund RF-20947."},
+ dupe:{l:"Merge accounts",r:S,d:"Accounts merged in the WHOOP platform. Salesforce contacts merged to match."},
+ inactive:{l:"Link purchase to account",r:R,d:"Purchase SO-59377 linked. Membership active."},
+ family:{l:"Remove unused membership",r:R,d:"Unused membership removed. Next renewal is for two."},
+ heart:{l:"View blood pressure readings",r:["spec"],consent:true,d:""},
+ login:{l:"Update email",r:S,d:"Email updated in the WHOOP platform and sent back to Salesforce."},
+ delete:{l:"Start deletion",r:S,d:"Deletion started in the WHOOP platform. Salesforce will anonymise on confirmation."}
+};
+ISSUES.forEach(function(x){ x.ch=CH[x.id]||x.ch; });
+
+var ROLES=[
+ {id:"rep",n:"Taylor R.",t:"Rep"},{id:"senior",n:"Morgan P.",t:"Senior rep"},{id:"spec",n:"Casey D.",t:"Health specialist"},
+ {id:"lead",n:"Jamie W.",t:"Team lead"},{id:"admin",n:"Riley K.",t:"Business Systems admin"},{id:"ai",n:"WHOOP assistant",t:"AI assistant"}];
+var PERMS=[
+ ["See member details",["rep","senior","spec","lead","ai"]],
+ ["Reply to routine cases",["rep","senior","spec","lead","ai"]],
+ ["Reply to cases needing judgement",["rep","senior","lead"]],
+ ["Reply to health-sensitive cases",["spec"]],
+ ["Send identity check codes",["rep","senior","spec","lead","ai"]],
+ ["Account changes (upgrade, lost, link order)",["rep","senior","lead"]],
+ ["Merge accounts, change email, deletion",["senior","lead"]],
+ ["Approve refund exceptions",["lead"]],
+ ["View health data (with member consent)",["spec"]],
+ ["Edit policy rules",["admin"]],
+ ["See integration and reconciliation logs",["admin","lead"]]
+];
+var role="rep", cur=ISSUES[6], mode="sf", ST={};
+function st(){ if(!ST[cur.id]) ST[cur.id]={ver: cur.ch==="In-app chat"?"ok":"none", consent:false, act:false, code:null}; return ST[cur.id]; }
+function can(list){ return list.indexOf(role)>-1; }
+function rname(id){ return ROLES.filter(function(r){return r.id===id;})[0].t; }
+function replyRoles(x){
+  if(x.who[1]==="alert") return ["spec"];
+  if(x.who[0].indexOf("WHOOP assistant")===0) return ["rep","senior","spec","lead","ai"];
+  if(x.who[0]==="Rep") return ["rep","senior","lead"];
+  return ["senior","lead"];
+}
+function needText(list){ return "Needs "+list.map(rname).join(" or "); }
+
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function src(o){return o===WP?"From WHOOP platform":"From "+o;}
+function owned(l,v,k,cls){return '<div class="f owned'+(cls||'')+'"'+(k?' data-k="'+k+'"':'')+'><span class="l">'+esc(l)+'</span><span class="v">'+esc(v)+'</span></div>';}
+function ref(k,l,v,o,extra){return '<div class="f ref'+(extra||'')+'" tabindex="0" role="button" data-k="'+k+'" data-o="'+esc(o)+'" data-l="'+esc(l)+'"><span class="l">'+esc(l)+'</span><span class="v">'+esc(v)+'</span><span class="src">'+src(o)+'</span></div>';}
+function key(k,l,v){return '<div class="f key" tabindex="0" data-key="'+k+'" data-k="'+k+'" title="Shared key, held in both systems"><span class="l">'+esc(l)+'</span><span class="v">'+esc(v)+'</span></div>';}
+var HID="Hidden until identity is verified", RED="Hidden for this role";
+
+function buildRail(){
+  var html="",sel="",g="";
+  ISSUES.forEach(function(x){
+    if(x.g!==g){ if(g) sel+='</optgroup>'; g=x.g; html+='<h2>'+g+'</h2>'; sel+='<optgroup label="'+g+'">'; }
+    html+='<button data-id="'+x.id+'"><span>'+esc(x.t)+'</span><i class="dot '+x.who[1]+'" aria-hidden="true"></i></button>';
+    sel+='<option value="'+x.id+'">'+esc(x.t)+'</option>';
+  });
+  html+='<div class="railkey"><span><i class="dot ok"></i>Routine</span><span><i class="dot warn"></i>Needs judgement or a policy no</span><span><i class="dot alert"></i>Health-sensitive</span></div>';
+  $("rail").innerHTML=html; $("pick").innerHTML=sel+'</optgroup>';
+  $("rail").querySelectorAll("button").forEach(function(b){b.addEventListener("click",function(){select(b.dataset.id);});});
+  $("pick").addEventListener("change",function(){select(this.value);});
+  $("role").innerHTML=ROLES.map(function(r){return '<option value="'+r.id+'">'+r.n+' ('+r.t+')</option>';}).join("");
+  $("role").addEventListener("change",function(){role=this.value; hideToast(); render();});
+}
+function permTable(){
+  var h='<table><thead><tr><th>Can</th>'+ROLES.map(function(r){return '<th>'+r.t+'</th>';}).join("")+'</tr></thead><tbody>';
+  PERMS.forEach(function(p){ h+='<tr><td>'+p[0]+'</td>'+ROLES.map(function(r){var y=p[1].indexOf(r.id)>-1; return '<td class="'+(y?'y':'n')+'">'+(y?'Yes':'No')+'</td>';}).join("")+'</tr>'; });
+  h+='</tbody></table><p class="need" style="margin-top:8px">The admin can change rules and see logs but not member names, messages or account details. The AI assistant can\'t reply on health-sensitive cases or make account changes.</p>';
+  $("permtable").innerHTML=h;
+}
+
+function verifyBox(x,m,S_){
+  if(role==="admin") return '<div class="verify"><span class="l">Identity check</span><span class="v">'+RED+'</span></div>';
+  if(S_.ver==="ok"){
+    var how=x.ch==="In-app chat"?"Signed in through the app. No extra check needed.":"Passed, SMS code to phone on file";
+    return '<div class="verify ok"><span class="l">Identity check</span><span class="v">'+how+'</span></div>';
+  }
+  var why={"Phone":"Caller ID matched this contact, but caller ID isn't proof of identity.","Website message":"Website messages aren't signed in.","Email":"An email address alone isn't proof of identity."}[x.ch];
+  var b;
+  if(S_.ver==="none") b='<button class="btn primary" id="sendcode">Send SMS code</button>';
+  else b='<button class="btn primary" id="entercode">Member read back the code</button><div class="demo">Demo: code on member\'s phone is '+S_.code+'. Expires in 5 minutes.</div>';
+  return '<div class="verify no"><span class="l">Identity check</span><span class="v">Not verified</span><div class="need">'+why+'</div><div class="row">'+b+'</div></div>';
+}
+
+function render(){
+  var x=cur,m=x.m,S_=st(), ok=S_.ver==="ok", adm=role==="admin";
+  $("role").value=role;
+  $("rail").querySelectorAll("button").forEach(function(b){b.setAttribute("aria-current",b.dataset.id===x.id?"true":"false");});
+  $("pick").value=x.id;
+  var idtxt=x.ch==="In-app chat"?"Signed in through the app":(ok?"Verified by SMS code":"Not yet verified");
+  $("summary").innerHTML='<div class="head"><span class="g">'+x.g+'</span><div class="t">'+esc(x.t)+'</div></div>'+
+   '<div><span class="k">Handled by</span><span class="badge '+x.who[1]+'">'+esc(x.who[0])+'</span></div>'+
+   '<div><span class="k">Channel and identity</span><div class="chips"><span class="chip">'+x.ch+'</span><span class="chip">'+idtxt+'</span></div></div>'+
+   '<div><span class="k">Done when</span>'+esc(x.done)+'</div>';
+
+  var mask=function(v){return adm?RED:(ok?v:HID);};
+  var mcls=(adm||!ok)?" masked":"";
+  var chat=adm?'<div class="msg sys">Messages hidden for this role</div>':x.chat.map(function(c){
+    if(c[0]==="sys") return '<div class="msg sys">'+esc(c[1])+'</div>';
+    var who=c[0]==="m"?m.n:"WHOOP assistant";
+    return '<div class="msg '+c[0]+'"><span class="who">'+esc(who)+'</span>'+esc(c[1])+'</div>';
+  }).join("");
+  var keys=(x.keys||[]).map(function(k){return key(k[0],k[1],ok&&!adm?k[2]:(adm?RED:HID));}).join("");
+  var refs=(x.sfRef||[]).map(function(r){return ref(r[0],r[1],mask(r[2]),r[3],mcls);}).join("");
+  var sown=(x.sfOwn||[]).map(function(o){return owned(o[0],adm?RED:o[1],null,adm?" masked":"");}).join("");
+  var codes='<option value="">Choose a code</option>'+x.codes.map(function(c){return '<option>'+esc(c)+'</option>';}).join("");
+  var rr=replyRoles(x), canReply=can(rr);
+  var replyNote=canReply?"":'<span class="need">'+(role==="ai"&&x.who[1]==="alert"?"The AI assistant can't reply on health-sensitive cases.":needText(rr)+" for this case.")+'</span>';
+
+  var call="";
+  if(x.ch==="Phone"){
+    call='<div class="call"><span class="live">Live call 04:12</span><span>'+(adm?RED:esc(m.phone))+'</span><span>Screen pop matched <b>'+(adm?"a contact":esc(m.n))+'</b> by caller ID</span><small>Through CTI: call log saved to the case automatically. Recording stays with the phone provider, linked from the case.</small></div>';
+  }
+
+  // action
+  var a=ACT[x.id], actHtml="";
+  if(a && !a.consent){
+    var dis="", why="";
+    if(!can(a.r)){dis=" disabled"; why=needText(a.r)+".";}
+    else if(!ok){dis=" disabled"; why="Verify identity first.";}
+    actHtml='<h3>Action</h3><div class="actbox"><div class="row"><button class="btn primary" id="act"'+dis+'>'+esc(a.l)+'</button></div>'+
+      (S_.act?'<div class="done" style="margin-top:6px">'+esc(a.d)+'</div>':(why?'<div class="need" style="margin-top:4px">'+why+'</div>':''))+'</div>';
+  }
+
+  $("view-sf").innerHTML='<div class="frame"><div class="bar"><strong>Salesforce Service Cloud</strong><small>'+ROLES.filter(function(r){return r.id===role;})[0].n+'</small></div>'+
+   '<div class="ownline">Owns <b>the support relationship</b>: cases, conversations, calls through CTI, routing, knowledge and support reporting.</div>'+
+   '<div class="casehead f" data-k="case"><span class="t">Case '+x.no+': '+esc(x.t)+'</span><span class="chip">'+x.ch+'</span><span class="chip">Queue: '+esc(x.who[0])+'</span></div>'+call+
+   '<div class="body"><div class="col"><h3>Member</h3>'+owned("Contact name",adm?RED:m.n,null,adm?" masked":"")+key("member","Member ID",m.id)+
+     '<div class="xlink"><button data-jump="member">Open member in WHOOP platform</button><code>members.whoop-internal.example/members/'+m.id+'</code></div>'+
+     verifyBox(x,m,S_)+ref("tier","Tier",mask(m.tier),WP,mcls)+ref("renew","Renews",mask(m.renew),WP,mcls)+ref("dev","Device",mask(m.dev),WP,mcls)+
+   '</div><div class="col mid"><h3>Conversation</h3><div class="chat" id="chat">'+chat+'</div>'+
+     (adm?'':'<label class="lab" for="reply">Reply</label><textarea id="reply"'+(canReply?'':' disabled')+'>'+esc(ok?x.reply:"Thanks for getting in touch. Before I can look at your account, I'll text a code to the phone number we have on file.")+'</textarea>'+
+     '<div class="row"><button class="btn primary" id="send"'+(canReply?'':' disabled')+'>Send reply</button>'+replyNote+'</div>')+
+     '<h3>Case outcome</h3>'+(x.rule?'<p class="rule"><b>Closing rule.</b> '+esc(x.rule)+'</p>':'')+
+     '<div class="f owned"><span class="l">Resolution code</span><select class="inline" id="code" aria-label="Resolution code"'+(canReply?'':' disabled')+'>'+codes+'</select></div>'+
+     '<div class="row"><button class="btn" id="resolve"'+(canReply?'':' disabled')+'>Mark resolved</button><span id="resmsg" aria-live="polite"></span></div>'+
+   '</div><div class="col"><h3>Answer to give</h3>'+ref("verdict","Verdict",mask(x.v[0]),x.v[2]," verdict "+x.v[1]+mcls)+actHtml+
+     (refs||keys||sown?'<h3>For this issue</h3>'+keys+refs+sown:'')+
+     '<h3>Suggested article</h3>'+owned("Knowledge",x.art)+
+     '<div class="none">Health and sensor data isn\'t stored in Salesforce.</div>'+
+   '</div></div></div>';
+
+  // ----- WHOOP platform view -----
+  var am=function(v){return adm?RED:v;}, acls=adm?" masked":"";
+  var wown=(x.wpOwn||[]).map(function(o){return owned(o[1],am(o[2]),o[0],acls);}).join("");
+  var polOwner = x.v[2]===POL?"Policy engine":(x.v[2]===WP?"Checks and diagnostics":"Answer");
+  var policyEdit = x.v[2]===POL ? '<div class="row" style="margin:-2px 0 8px"><button class="btn" id="editpol"'+(adm?'':' disabled')+'>Edit rule</button>'+(adm?'':'<span class="need">Needs Business Systems admin</span>')+'</div>' : '';
+  var verdictOwned = (x.v[2]===POL||x.v[2]===WP) ? owned(x.v[2]===POL?"Verdict, policy version 14":"Diagnostic result",x.v[2]===POL?x.v[0]:am(x.v[0]),"verdict",x.v[2]===POL?"":acls)+policyEdit
+                     : '<div class="none">This answer comes from '+x.v[2]+', not from here.</div>';
+  var wkeys=(x.keys||[]).map(function(k){return key(k[0],k[1],k[2]);}).join("");
+  var verTxt=x.ch==="In-app chat"?"Signed in through the app (no extra check)":(ok?"Passed, SMS code, just now":(S_.ver==="sent"?"Code sent, waiting, attempt 1 of 3":"Not verified"));
+  var health;
+  if(a&&a.consent){
+    var cons=S_.consent;
+    var canSee=can(a.r)&&cons;
+    health='<div class="f owned" data-k="cons"><span class="l">Health data consent</span><span class="v">'+(cons?"Allowed by member, 10:16 am. Blood Pressure Insights only, 24 hours":"Requested 10:14 am, waiting for member")+'</span></div>'+
+      (cons?'':'<div class="row" style="margin:-2px 0 8px"><button class="btn" id="allow">Member taps Allow (demo)</button></div>')+
+      (canSee?'<div class="readings"><b>Visible to Casey D. for 24 hours</b><br>7-day estimate trending above this member\'s usual range. Fictional values for the demo.</div>'
+             :'<div class="locked"><b>Locked</b>'+(cons?"Only the health specialist can view these readings.":esc(x.lock))+'</div>');
+  } else {
+    health='<div class="locked"><b>Locked</b>'+esc(x.lock||"Not needed for this issue. Health and sensor data stays here and is never copied to Salesforce.")+'</div>';
+  }
+  $("view-wp").innerHTML='<div class="frame"><div class="bar"><strong>WHOOP member platform</strong><small>Internal tool</small></div>'+
+   '<div class="ownline">Owns <b>the member\'s account, device, health data, consent, identity checks and policy rules</b>, plus the connection to Salesforce.</div>'+
+   '<div class="body"><div class="col"><h3>Account</h3>'+key("member","Member ID (created here)",m.id)+
+     owned("Verified email",am(m.email),null,acls)+owned("Verified phone",am(m.phone),null,acls)+owned("Identity check for this case",verTxt,"ver")+
+     '<h3>Membership and device</h3>'+owned("Tier",am(m.tier),"tier",acls)+owned("Renews",am(m.renew),"renew",acls)+owned("Device",am(m.dev),"dev",acls)+
+   '</div><div class="col"><h3>'+polOwner+'</h3>'+verdictOwned+
+     (wown||wkeys?'<h3>For this issue</h3>'+wown+wkeys:'')+
+     '<h3>Health data</h3>'+health+
+     '<h3>Support history</h3>'+ref("case","Open case",x.no+", "+x.ch+", "+x.who[0],"Salesforce Service Cloud")+
+     '<div class="xlink"><button data-jump="case">Open case '+x.no+' in Salesforce</button><code>yourcompany.lightning.force.com/lightning/r/Case/500Hs00001'+x.no.slice(-5)+'IAV/view</code></div>'+
+   '</div><div class="col wide"><h3>Connection to Salesforce</h3>'+
+     (can(["admin","lead"])?'<ul class="log">'+
+     (x.ch==="Phone"?'<li><time>live</time>Call logged on case by CTI. No call data stored here</li>':'')+
+     (S_.ver==="ok"&&x.ch!=="In-app chat"?'<li><time>now</time>Identity check passed. Result sent to case (real time)</li>':'')+
+     x.ev.map(function(e){return '<li><time>'+e[0]+'</time>'+esc(e[1])+'</li>';}).join("")+
+     '<li><time>2:00 am</time>Nightly sync finished. Members updated by member ID, no failures</li></ul>'+
+     '<h3>Reconciliation check for this issue type</h3><div class="tablewrap"><table><thead><tr><th>Check</th><th>Exceptions today</th><th>Owner</th></tr></thead><tbody><tr><td>'+esc(x.rec[0])+'</td><td>'+x.rec[1]+'</td><td>'+esc(x.rec[2])+'</td></tr></tbody></table></div>'
+     :'<div class="none">Integration and reconciliation logs are visible to the Business Systems admin and team leads.</div>')+
+   '</div></div></div>';
+  wire();
+}
+
+function wire(){
+  var S_=st();
+  document.querySelectorAll(".f.key").forEach(function(el){
+    function on(){document.querySelectorAll('.f.key[data-key="'+el.dataset.key+'"]').forEach(function(y){y.classList.add("hl");});}
+    function off(){document.querySelectorAll(".f.key.hl").forEach(function(y){y.classList.remove("hl");});}
+    el.addEventListener("mouseenter",on);el.addEventListener("mouseleave",off);el.addEventListener("focus",on);el.addEventListener("blur",off);
+  });
+  document.querySelectorAll(".f.ref").forEach(function(el){
+    function show(){
+      var o=el.dataset.o, other=o.indexOf("Salesforce")===0?"view-sf":(o===WP||o===POL?"view-wp":null);
+      var msg=el.dataset.l+" is read-only here. It's owned by "+o+".";
+      if(!other) msg+=" Open it there using the reference on this case.";
+      toastShow(msg, other?{view:other,k:el.dataset.k}:null, other==="view-sf"?"Open in Salesforce":"Open in WHOOP platform");
+    }
+    el.addEventListener("click",show);
+    el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();show();}});
+  });
+  document.querySelectorAll("[data-jump]").forEach(function(b){
+    b.addEventListener("click",function(){ jump({view: b.closest(".view").id==="view-sf"?"view-wp":"view-sf", k:b.dataset.jump}); });
+  });
+  var on=function(id,fn){var e=$(id); if(e) e.addEventListener("click",fn);};
+  on("sendcode",function(){ S_.ver="sent"; S_.code=String(Math.floor(100000+Math.random()*900000)); render(); });
+  on("entercode",function(){ S_.ver="ok"; render(); toastShow("Identity verified. The WHOOP platform checked the code and sent the result to the case.",null); });
+  on("act",function(){ S_.act=true; render(); });
+  on("allow",function(){ S_.consent=true; render(); });
+  on("editpol",function(){ toastShow("The policy editor would open here. Changes are versioned and tested before release, then the same answer updates the rep screen, help centre and assistant.",null); });
+  on("send",function(){
+    var t=$("reply").value.trim(); if(!t) return;
+    var d=document.createElement("div"); d.className="msg a";
+    var w=document.createElement("span"); w.className="who"; w.textContent=ROLES.filter(function(r){return r.id===role;})[0].n+", just now";
+    d.appendChild(w); d.appendChild(document.createTextNode(t)); $("chat").appendChild(d); $("reply").value="";
+  });
+  on("resolve",function(){
+    var c=$("code").value, r=$("resmsg");
+    if(!c){ r.className=""; r.style.color="var(--alert)"; r.textContent="Choose a resolution code first."; return; }
+    r.style.color=""; r.className="done"; r.textContent="Resolved: "+c+". Outcome sent to the WHOOP platform.";
+  });
+}
+
+var pending=null;
+function toastShow(msg,target,label){
+  $("toast-text").textContent=msg; pending=target;
+  $("toast-go").style.display=target?"":"none"; $("toast-go").textContent=label||"Open";
+  $("toast").classList.add("show");
+}
+function hideToast(){$("toast").classList.remove("show"); pending=null;}
+function jump(t){
+  if(mode!=="split") setMode(t.view==="view-sf"?"sf":"wp");
+  var el=document.querySelector("#"+t.view+' [data-k="'+t.k+'"]');
+  if(!el) return;
+  el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+}
+$("toast-go").addEventListener("click",function(){ if(pending){ var p=pending; hideToast(); jump(p);} });
+$("toast-x").addEventListener("click",hideToast);
+function setMode(mm){
+  mode=mm;
+  document.querySelectorAll(".seg button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.mode===mm?"true":"false");});
+  $("stage").classList.toggle("split",mm==="split");
+  $("view-sf").classList.toggle("show",mm==="sf"||mm==="split");
+  $("view-wp").classList.toggle("show",mm==="wp"||mm==="split");
+}
+document.querySelectorAll(".seg button").forEach(function(b){b.addEventListener("click",function(){setMode(b.dataset.mode);hideToast();});});
+window.addEventListener("resize",function(){ if(mode==="split"&&window.innerWidth<1280) setMode("sf"); });
+function select(id){ cur=ISSUES.filter(function(x){return x.id===id;})[0]; hideToast(); render(); }
+$("reset").addEventListener("click",function(){ ST={}; role="rep"; cur=ISSUES[6]; setMode("sf"); hideToast(); render(); });
+
+var root=document.documentElement, tb=$("theme");
+function isDark(){var t=root.getAttribute("data-theme"); return t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches;}
+function lab(){tb.textContent=isDark()?"Light theme":"Dark theme";}
+try{var s=localStorage.getItem("twoSys-theme"); if(s) root.setAttribute("data-theme",s);}catch(e){}
+tb.addEventListener("click",function(){var n=isDark()?"light":"dark"; root.setAttribute("data-theme",n); lab(); try{localStorage.setItem("twoSys-theme",n);}catch(e){}});
+lab(); buildRail(); permTable(); render();
+</script>
+</body>
+</html>

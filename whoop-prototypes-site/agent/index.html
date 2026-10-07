@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Support agent with guardrails: a WHOOP-style demo</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header class="top">
+  <h1>Support agent with guardrails</h1>
+  <p>A WHOOP-style in-app support agent. It answers routine questions with tools, hands anything involving money or health to a person, and shows every step it takes. Fictional data, not affiliated with WHOOP.</p>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Agent mode">
+      <button data-mode="sim" aria-pressed="true">Simulated</button>
+      <button data-mode="claude" aria-pressed="false">Claude API</button>
+    </div>
+    <span class="muted small" id="modenote"></span>
+    <button class="btn" id="reset">Reset chat</button>
+  </div>
+  <div class="keybox" id="keybox" hidden>
+    <label>API key <input id="apikey" type="password" autocomplete="off" placeholder="sk-ant-..."></label>
+    <label>Model <input id="model" type="text" value="claude-sonnet-5-5"></label>
+    <p class="muted small">Your key stays in this page's memory and is never saved or sent anywhere except Anthropic. Demo only: in production, calls go through a backend so keys never reach a browser.</p>
+  </div>
+</header>
+
+<main class="grid">
+  <section class="phone-col" aria-label="Member's app">
+    <div class="phone">
+      <div class="phone-top">
+        <label class="small">Signed in to the app as <select id="member" aria-label="Signed-in member"></select></label>
+      </div>
+      <div class="chat" id="chat" aria-live="polite"></div>
+      <form class="composer" id="composer">
+        <label class="sr-only" for="msg">Message</label>
+        <input id="msg" type="text" placeholder="Message WHOOP support" autocomplete="off">
+        <button class="btn primary" id="send" type="submit">Send</button>
+      </form>
+    </div>
+    <h2>Try a scenario</h2>
+    <div class="scenarios" id="scenarios"></div>
+  </section>
+
+  <section class="trace-col" aria-label="What the agent is doing">
+    <h2>What the agent is doing</h2>
+    <p class="muted small" id="trace-empty">Send a message or pick a scenario. Every check, tool call and decision shows up here.</p>
+    <ol class="trace" id="trace"></ol>
+  </section>
+
+  <aside class="side-col">
+    <h2>Handoffs to Service Cloud</h2>
+    <p class="muted small" id="cases-empty">No cases yet. The agent creates one whenever a person needs to decide.</p>
+    <div id="cases"></div>
+    <div class="rules">
+      <h2>The agent can't</h2>
+      <ul id="cannot"></ul>
+      <p class="muted small">These are enforced in code, not just in the prompt. The agent has no tool that moves money, and any reply that promises money is blocked before the member sees it.</p>
+    </div>
+  </aside>
+</main>
+
+<footer class="foot">Fictional members, orders and policies, simplified from public information. Not affiliated with or endorsed by WHOOP.</footer>
+
+<script src="js/data.js"></script>
+<script src="js/guardrails.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/agent-sim.js"></script>
+<script src="js/agent-claude.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
