@@ -160,6 +160,8 @@
 
     /* FEATURED CASE STUDY */
     .featured-wrap { background: #1c1008; }
+    .featured-wrap + .featured-wrap { border-top: 0.5px solid rgba(200,132,58,0.18); }
+    .featured-wrap + .featured-wrap .featured-inner { padding-top: 5rem; }
     .featured-inner { max-width: var(--max); margin: 0 auto; padding: 6rem 3.5rem; }
     .featured-header { margin-bottom: 1rem; }
     .featured-kicker { font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase; color: #c8843a; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem; }
@@ -174,6 +176,7 @@
     .featured-body strong { color: #c8a878; font-weight: 400; }
     .featured-diagram { background: #150e04; border: 0.5px solid rgba(200,132,58,0.2); padding: 2rem 1.5rem; overflow-x: auto; }
     .featured-diagram svg { display: block; margin: 0 auto; }
+    .featured-caption { font-size: 0.78rem; color: #705040; text-align: center; margin-top: 1rem; line-height: 1.7; }
     .featured-stats { display: flex; flex-wrap: wrap; gap: 0; margin-top: 2rem; border: 0.5px solid rgba(200,132,58,0.15); }
     .fstat { flex: 1; min-width: 140px; padding: 1.5rem 2rem; border-right: 0.5px solid rgba(200,132,58,0.12); }
     .fstat:last-child { border-right: none; }
@@ -504,6 +507,238 @@
       <div class="fstat">
         <div class="fstat-num">120+</div>
         <div class="fstat-label">Work items tracked to go-live</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CASE STUDY — LENOVO EVOLVE RBAC -->
+<div class="featured-wrap fi" id="rbac">
+  <div class="featured-inner">
+    <div class="featured-header fi">
+      <div class="featured-kicker">Case Study · Experience Commerce / Fulcro Consulting</div>
+      <h2 class="featured-title">Role-Based Access Control<br /><em>for Lenovo Evolve</em></h2>
+      <div class="featured-meta">
+        <div class="featured-meta-item">
+          <div class="featured-meta-label">Client</div>
+          <div class="featured-meta-val">Lenovo · Evolve Partner Platform</div>
+        </div>
+        <div class="featured-meta-item">
+          <div class="featured-meta-label">Scope</div>
+          <div class="featured-meta-val">11,500+ Partners · 3 User Types</div>
+        </div>
+        <div class="featured-meta-item">
+          <div class="featured-meta-label">Stack</div>
+          <div class="featured-meta-val">Drupal · AWS · Govt GST API · SQL</div>
+        </div>
+        <div class="featured-meta-item">
+          <div class="featured-meta-label">Role</div>
+          <div class="featured-meta-val">Project Management Executive</div>
+        </div>
+      </div>
+      <p class="featured-body">
+        Evolve served retailers, distributors and Lenovo area sales officers — three user types that could not
+        share one login model. I defined a <strong>separate authentication path for each</strong>: government
+        GST API verification for retailers, employee ID plus registered mobile for sales officers, and manual
+        onboarding for distributors carrying multiple GST numbers. Authorization applied
+        <strong>least privilege at the role level</strong> — retailers earn and redeem points, sales officers
+        service accounts without redemption rights, distributors report sales under their own pricing.
+        <strong>Joiner-mover-leaver handling was built into the product</strong>, not bolted on: leavers
+        deactivated, retailers given a three-month window to burn points before promotion, promoted
+        distributors wiped of app data except verified identity. A quarterly status review blocked moved
+        accounts from their old flow, which <strong>prevented privilege carryover</strong> between user types.
+      </p>
+    </div>
+    <div class="featured-diagram fi">
+
+<svg viewBox="0 0 860 400" xmlns="http://www.w3.org/2000/svg" style="max-width:820px;width:100%;" role="img" aria-label="Access control matrix: three user types by authentication, authorization and lifecycle">
+
+<!-- Column headers -->
+<rect x="190" y="14" width="200" height="62" rx="8" class="f-build" stroke-width="1"/>
+<text x="290" y="42" text-anchor="middle" class="f-lm">Retailer</text>
+<text x="290" y="62" text-anchor="middle" class="f-ls">Under 1,000 units/yr</text>
+
+<rect x="410" y="14" width="200" height="62" rx="8" class="f-build" stroke-width="1"/>
+<text x="510" y="42" text-anchor="middle" class="f-lm">ASO</text>
+<text x="510" y="62" text-anchor="middle" class="f-ls">Area sales officer</text>
+
+<rect x="630" y="14" width="200" height="62" rx="8" class="f-build" stroke-width="1"/>
+<text x="730" y="42" text-anchor="middle" class="f-lm">Distributor</text>
+<text x="730" y="62" text-anchor="middle" class="f-ls">1,000–10,000/yr</text>
+
+<!-- Row 1: AuthN -->
+<rect x="20" y="94" width="150" height="72" rx="8" class="f-gray" stroke-width="1"/>
+<text x="95" y="124" text-anchor="middle" class="f-lm">AuthN</text>
+<text x="95" y="145" text-anchor="middle" class="f-ls">Who are you</text>
+
+<rect x="190" y="94" width="200" height="72" rx="8" class="f-kms" stroke-width="1"/>
+<text x="290" y="124" text-anchor="middle" class="f-lm">GST check</text>
+<text x="290" y="145" text-anchor="middle" class="f-ls">Govt API verified</text>
+
+<rect x="410" y="94" width="200" height="72" rx="8" class="f-kms" stroke-width="1"/>
+<text x="510" y="124" text-anchor="middle" class="f-lm">Employee ID</text>
+<text x="510" y="145" text-anchor="middle" class="f-ls">Plus registered mobile</text>
+
+<rect x="630" y="94" width="200" height="72" rx="8" class="f-kms" stroke-width="1"/>
+<text x="730" y="124" text-anchor="middle" class="f-lm">Manual setup</text>
+<text x="730" y="145" text-anchor="middle" class="f-ls">Multiple GST nos.</text>
+
+<!-- Row 2: AuthZ -->
+<rect x="20" y="184" width="150" height="72" rx="8" class="f-gray" stroke-width="1"/>
+<text x="95" y="214" text-anchor="middle" class="f-lm">AuthZ</text>
+<text x="95" y="235" text-anchor="middle" class="f-ls">What you can do</text>
+
+<rect x="190" y="184" width="200" height="72" rx="8" class="f-teal" stroke-width="1"/>
+<text x="290" y="214" text-anchor="middle" class="f-lm">Earn + redeem</text>
+<text x="290" y="235" text-anchor="middle" class="f-ls">Points, peripherals</text>
+
+<rect x="410" y="184" width="200" height="72" rx="8" class="f-teal" stroke-width="1"/>
+<text x="510" y="214" text-anchor="middle" class="f-lm">Serve retailers</text>
+<text x="510" y="235" text-anchor="middle" class="f-ls">No redemption</text>
+
+<rect x="630" y="184" width="200" height="72" rx="8" class="f-teal" stroke-width="1"/>
+<text x="730" y="214" text-anchor="middle" class="f-lm">Report sales</text>
+<text x="730" y="235" text-anchor="middle" class="f-ls">Own pricing, no points</text>
+
+<!-- Row 3: Lifecycle -->
+<rect x="20" y="274" width="150" height="72" rx="8" class="f-gray" stroke-width="1"/>
+<text x="95" y="304" text-anchor="middle" class="f-lm">Lifecycle</text>
+<text x="95" y="325" text-anchor="middle" class="f-ls">Mover, leaver</text>
+
+<rect x="190" y="274" width="200" height="72" rx="8" class="f-purp" stroke-width="1"/>
+<text x="290" y="304" text-anchor="middle" class="f-lm">LEP trial</text>
+<text x="290" y="325" text-anchor="middle" class="f-ls">3 months, burn points</text>
+
+<rect x="410" y="274" width="200" height="72" rx="8" class="f-purp" stroke-width="1"/>
+<text x="510" y="304" text-anchor="middle" class="f-lm">Leaves Lenovo</text>
+<text x="510" y="325" text-anchor="middle" class="f-ls">Account deactivated</text>
+
+<rect x="630" y="274" width="200" height="72" rx="8" class="f-purp" stroke-width="1"/>
+<text x="730" y="304" text-anchor="middle" class="f-lm">Promoted in</text>
+<text x="730" y="325" text-anchor="middle" class="f-ls">Data wiped, ID kept</text>
+
+<!-- Legend -->
+<text x="430" y="378" text-anchor="middle" class="f-sl">Amber = authentication · Green = authorization · Purple = lifecycle</text>
+
+</svg>
+
+    </div>
+    <p class="featured-caption">Retailer to LEP to distributor took 6+ months, driven by a quarterly status table.</p>
+    <div class="featured-stats fi">
+      <div class="fstat">
+        <div class="fstat-num">11,500+</div>
+        <div class="fstat-label">Partners under access control</div>
+      </div>
+      <div class="fstat">
+        <div class="fstat-num">3</div>
+        <div class="fstat-label">Separate authentication paths</div>
+      </div>
+      <div class="fstat">
+        <div class="fstat-num">3 mo</div>
+        <div class="fstat-label">Retailer window to redeem points</div>
+      </div>
+      <div class="fstat">
+        <div class="fstat-num">0</div>
+        <div class="fstat-label">Privilege carryover between roles</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CASE STUDY — ARGONAUT MES SSO -->
+<div class="featured-wrap fi" id="argonaut">
+  <div class="featured-inner">
+    <div class="featured-header fi">
+      <div class="featured-kicker">Case Study · Dana Incorporated</div>
+      <h2 class="featured-title">Single Sign-On for<br /><em>Argonaut MES</em></h2>
+      <div class="featured-meta">
+        <div class="featured-meta-item">
+          <div class="featured-meta-label">System</div>
+          <div class="featured-meta-val">Argonaut · Manufacturing Execution System</div>
+        </div>
+        <div class="featured-meta-item">
+          <div class="featured-meta-label">Scope</div>
+          <div class="featured-meta-val">4 Global Plants</div>
+        </div>
+        <div class="featured-meta-item">
+          <div class="featured-meta-label">Stack</div>
+          <div class="featured-meta-val">Azure AD · JFrog · ERP · SharePoint</div>
+        </div>
+        <div class="featured-meta-item">
+          <div class="featured-meta-label">Role</div>
+          <div class="featured-meta-val">Engineering PM Intern · Dana Incorporated</div>
+        </div>
+      </div>
+      <p class="featured-body">
+        Argonaut runs shifts, tracks production and deploys firmware to the line across four global plants.
+        I led delivery of <strong>single sign-on with Azure AD as the identity provider</strong>, replacing
+        shared plant-floor logins with individual Dana accounts and <strong>per-person shift accountability</strong>.
+        Argonaut also sits inside the secure firmware pipeline: before any ECU is flashed, it verifies that the
+        <strong>signed binaries from JFrog match the BOM version in ERP</strong>. Separately, after finding that
+        line operators were bypassing the Digital Shop dashboard to hit quotas, I drove adoption
+        <strong>without a mandate</strong> — plain-English tooltips on each metric, suggested by a line manager,
+        plus a SharePoint feedback form with fast turnaround.
+      </p>
+    </div>
+    <div class="featured-diagram fi">
+
+<svg viewBox="0 0 860 340" xmlns="http://www.w3.org/2000/svg" style="max-width:820px;width:100%;" role="img" aria-label="Single sign-on flow from line manager through Argonaut MES and Azure AD to a logged, audited shift">
+
+<!-- Top row -->
+<rect x="20" y="30" width="200" height="72" rx="8" class="f-gray" stroke-width="1"/>
+<text x="120" y="60" text-anchor="middle" class="f-lm">Line manager</text>
+<text x="120" y="81" text-anchor="middle" class="f-ls">Starts a shift</text>
+
+<rect x="330" y="30" width="200" height="72" rx="8" class="f-coral" stroke-width="1"/>
+<text x="430" y="60" text-anchor="middle" class="f-lm">Argonaut MES</text>
+<text x="430" y="81" text-anchor="middle" class="f-ls">Service provider</text>
+
+<rect x="640" y="30" width="200" height="72" rx="8" class="f-kms" stroke-width="1"/>
+<text x="740" y="60" text-anchor="middle" class="f-lm">Azure AD</text>
+<text x="740" y="81" text-anchor="middle" class="f-ls">Identity provider</text>
+
+<!-- Bottom row -->
+<rect x="640" y="190" width="200" height="72" rx="8" class="f-kms" stroke-width="1"/>
+<text x="740" y="220" text-anchor="middle" class="f-lm">Dana sign-in</text>
+<text x="740" y="241" text-anchor="middle" class="f-ls">Individual account</text>
+
+<rect x="330" y="190" width="200" height="72" rx="8" class="f-teal" stroke-width="1"/>
+<text x="430" y="220" text-anchor="middle" class="f-lm">Signed assertion</text>
+<text x="430" y="241" text-anchor="middle" class="f-ls">Argonaut verifies</text>
+
+<rect x="20" y="190" width="200" height="72" rx="8" class="f-purp" stroke-width="1"/>
+<text x="120" y="220" text-anchor="middle" class="f-lm">Access logged</text>
+<text x="120" y="241" text-anchor="middle" class="f-ls">Who ran each shift</text>
+
+<!-- Arrows -->
+<line x1="224" y1="66" x2="322" y2="66" class="f-aa" marker-end="url(#fa)"/>
+<line x1="534" y1="66" x2="632" y2="66" class="f-aa" marker-end="url(#fa)"/>
+<line x1="740" y1="106" x2="740" y2="182" class="f-aa" marker-end="url(#fa)"/>
+<line x1="636" y1="226" x2="538" y2="226" class="f-aa" marker-end="url(#fa)"/>
+<line x1="326" y1="226" x2="228" y2="226" class="f-aa" marker-end="url(#fa)"/>
+
+<!-- Legend -->
+<text x="430" y="312" text-anchor="middle" class="f-sl">Amber = identity provider · Orange = Argonaut · Green = signed token · Purple = audit</text>
+
+</svg>
+
+    </div>
+    <div class="featured-stats fi">
+      <div class="fstat">
+        <div class="fstat-num">4</div>
+        <div class="fstat-label">Global plants supported</div>
+      </div>
+      <div class="fstat">
+        <div class="fstat-num">0</div>
+        <div class="fstat-label">Shared logins after rollout</div>
+      </div>
+      <div class="fstat">
+        <div class="fstat-num">BOM</div>
+        <div class="fstat-label">Verified before every ECU flash</div>
+      </div>
+      <div class="fstat">
+        <div class="fstat-num">4</div>
+        <div class="fstat-label">Live metrics on the shop dashboard</div>
       </div>
     </div>
   </div>
